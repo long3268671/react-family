@@ -10,6 +10,7 @@ const initState = {
 export default function reducer(state = initState, action) {
     switch (action.type) {
         case GET_USER_INFO_REQUEST:
+            console.log(state)
             return {
                 ...state,
                 isLoading: true,

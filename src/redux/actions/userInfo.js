@@ -23,18 +23,28 @@ function getUserInfoFail() {
 export function getUserInfo() {
     return function (dispatch) {
         dispatch(getUserInfoRequest());
-
-        return fetch('http://localhost:9999/api/user.json')
-            .then((response => {
-                return response.json()
-            }))
-            .then((json) => {
-                    dispatch(getUserInfoSuccess(json))
-                }
-            ).catch(
-                () => {
-                    dispatch(getUserInfoFail());
-                }
-            )
+        setTimeout(()=>{
+            let obj = {
+                name:'张三',
+                intro:'这个是张三的介绍'
+            }
+            dispatch(getUserInfoSuccess(obj))
+        },1000)
+        // return fetch('http://localhost:8080/api/app.json')
+        //     .then((response => {
+        //         return response.json()
+        //     }))
+        //     .then((json) => {
+        //             let obj = {
+        //                 name:'张三',
+        //                 intro:'这个是张三的介绍'
+        //             }
+        //             dispatch(getUserInfoSuccess(obj))
+        //         }
+        //     ).catch(
+        //         () => {
+        //             dispatch(getUserInfoFail());
+        //         }
+        //     )
     }
 }

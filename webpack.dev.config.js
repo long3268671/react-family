@@ -1,51 +1,49 @@
 const path = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');//自动创建html文件
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');//清除多余文件
 
 module.exports = {
-    devtool: 'inline-source-map',// 用于开发调试，方便清楚是那个文件出错 (共有7种)
+    devtool: 'inline-source-map',
+    mode:'development',
+    /*入口*/
     entry: [
         'react-hot-loader/patch',
         path.join(__dirname, 'src/index.js')
     ],
+
+    /*输出到dist文件夹，输出文件名字为bundle.js*/
     output: {
-        filename: 'bundle.js', // 输出的文件名
-        path: path.resolve(__dirname, 'dist')
+        path: path.join(__dirname, './dist'),
+        filename: 'bundle.js'
     },
-    module: {
-        rules: [{
-            test: /\.css$/,
-            use:"style-loader!css-loader"
-        }, {
-            test: /\.scss$/,
-            use:["style-loader","css-loader","sass-loader"]
-            // 加载时顺序从右向左
-        }, {
-            test: /\.(png|svg|jpg|gif)$/,
-            use: ['file-loader']
-        }, {
-            test: /\.(js|jsx)$/,
-            loader: 'babel-loader',
-            exclude: /node_modules/
-            }]
-    },
-    plugins: [
-        new CleanWebpackPlugin(),//每次编译都会把默认dist下的文件清除，新版clean-webpack-plugin 只能接受一个对象
-        // new webpack.HotModuleReplacementPlugin(),  //热更新
-        new HtmlWebpackPlugin({
-            template: 'src/index.html' //使用一个模板
-        })
-    ],
-    devServer: {
-        contentBase: './dist',   //目录文件
-        // hot: true,    //热更新
-        inline: true,
-        port: 9999   //端口
-    },
+    // 别名
     resolve: {
         alias: {
-            '@': path.join(__dirname, 'src'),
+            '@': path.join(__dirname, 'src')
+        }
+    },
+    /*src文件夹下面的以.js结尾的文件，要使用babel解析*/
+    /*cacheDirectory是用来缓存编译结果，下次编译加速*/
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: ['babel-loader?cacheDirectory=true'],
+            include: path.join(__dirname, 'src')
+        }]
+    },
+    /**
+     * @port 端口号
+     * @contentBase 启动路径
+     * @historyApiFallback 让所有的404定位到index.html（如页面打开是http://localhost:8080/page1,刷新页面 页面404
+     *  原因在于dist没有page1.html文件 所以重定向http://localhost:8080/page1/index.html）
+     * @host  外部访问地址
+     * @proxy  代理
+     * **/
+    devServer: {
+        port: 8080,
+        contentBase: path.join(__dirname, './dist'),
+        historyApiFallback: true,
+        // host: '10.10.3.106'
+        proxy: {
+            "/api": "http://localhost:3000"
         }
     }
 };
