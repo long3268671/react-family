@@ -1,18 +1,23 @@
+const merge = require('webpack-merge');
 const path = require('path');
+const webpack = require('webpack');
+const commonConfig = require('./webpack.common.config.js');
 
-module.exports = {
+const devConfig = {
     devtool: 'inline-source-map',
     mode:'development',
     /*入口*/
-    entry: [
-        'react-hot-loader/patch',
-        path.join(__dirname, 'src/index.js')
-    ],
+    entry: {
+        app: [
+            'babel-polyfill',
+            'react-hot-loader/patch',
+            path.join(__dirname, 'src/index.js')
+        ]
+    },
 
     /*输出到dist文件夹，输出文件名字为bundle.js*/
     output: {
-        path: path.join(__dirname, './dist'),
-        filename: 'bundle.js'
+        filename: '[name].[hash].js',
     },
     // 别名
     resolve: {
@@ -23,11 +28,12 @@ module.exports = {
     /*src文件夹下面的以.js结尾的文件，要使用babel解析*/
     /*cacheDirectory是用来缓存编译结果，下次编译加速*/
     module: {
-        rules: [{
-            test: /\.js$/,
-            use: ['babel-loader?cacheDirectory=true'],
-            include: path.join(__dirname, 'src')
-        }]
+        rules: [
+            {
+                /**加载css scss**/
+                test: [/\.css$/,/\.scss$/],
+                use: ['style-loader', 'css-loader', 'sass-loader','postcss-loader']
+            }]
     },
     /**
      * @port 端口号
@@ -45,5 +51,19 @@ module.exports = {
         proxy: {
             "/api": "http://localhost:3000"
         }
-    }
+    },
+    plugins:[
+        new webpack.DefinePlugin({
+            MOCK: true
+        })
+    ]
 };
+module.exports = merge({
+    customizeArray(a, b, key) {
+        /*entry.app不合并，全替换*/
+        if (key === 'entry.app') {
+            return b;
+        }
+        return undefined;
+    }
+})(commonConfig, devConfig);
